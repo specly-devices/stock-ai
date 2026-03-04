@@ -60,7 +60,7 @@ STOCK_KEYWORDS = {
     "BAJFINANCE.NS": ["bajaj finance", "bajfinance"],
     "WIPRO.NS":      ["wipro"],
     "HINDUNILVR.NS": ["hindustan unilever", "hul"],
-    "ULTRACEMCO.NS": ["ultratech cement", "ultratech"]
+    "ULTRACEMCO.NS": ["ultratech cement", "ultratech"],
     # Mid & Small Cap additions
     "M&M.NS":  ["tata motors", "tatamotors"],
     "ADANIENT.NS":    ["adani enterprises", "adani ent"],

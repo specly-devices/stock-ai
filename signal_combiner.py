@@ -6,6 +6,7 @@ from data_pipeline import run_pipeline, fetch_stock_data, calculate_indicators, 
 from news_engine import run_news_engine
 from alerts import send_alert
 from risk_manager import run_risk_check
+from stock_filter import get_stock_tier
 
 load_dotenv()
 
@@ -89,6 +90,16 @@ def combine_signals(technical_signal, sentiment_score):
 
     ml_label = f"ML {ml_prediction} ({ml_prob}%)" if ml_prediction else "ML N/A"
     full_reason = f"{technical_signal['reason']} | {sentiment_label} | {ml_label}"
+
+    # Apply backtest-based tier adjustment
+    tier, multiplier = get_stock_tier(technical_signal["symbol"])
+    combined_confidence = round(min(combined_confidence * multiplier, 95.0), 1)
+
+    if tier == "AVOID" and final_signal == "BUY":
+        final_signal = "HOLD"
+        full_reason  = f"[BACKTESTED: AVOID] {full_reason}"
+    elif tier == "HIGH":
+        full_reason  = f"[BACKTESTED: HIGH CONFIDENCE] {full_reason}"
 
     return {
         "symbol":          technical_signal["symbol"],

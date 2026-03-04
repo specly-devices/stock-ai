@@ -7,6 +7,7 @@ from news_engine import run_news_engine
 from alerts import send_alert
 from risk_manager import run_risk_check
 from stock_filter import get_stock_tier
+from market_regime import get_market_regime, should_allow_buy, get_regime_multiplier
 
 load_dotenv()
 
@@ -185,6 +186,12 @@ def run_combiner():
     print("\n🛡️  Running portfolio risk check...")
     run_risk_check()
 
+    # Step 0: Check market regime
+    print("🌍 Step 0: Checking market regime...")
+    regime, regime_score, regime_details = get_market_regime()
+    regime_multiplier = get_regime_multiplier(regime)
+    print(f"   Regime: {regime} | Score: {regime_score:+.3f} | "
+          f"Confidence multiplier: {regime_multiplier}x\n")
     # Step 1: Run technical analysis
     print("📊 Step 1: Running technical analysis...")
     technical_signals = run_pipeline()
@@ -227,6 +234,19 @@ def run_combiner():
             f"{emoji} {symbol:<20} {final['signal']:<25} "
             f"₹{final['price']:<10} Conf:{final['confidence']}%"
         )
+
+        # Send alert only for strong BUY or SELL signals
+        # Apply regime multiplier to confidence
+        final["confidence"] = round(
+            min(final["confidence"] * regime_multiplier, 95.0), 1
+        )
+
+        # Check if BUY is allowed in current market regime
+        buy_allowed, min_conf = should_allow_buy(regime, final["confidence"])
+
+        if final["signal"].startswith("BUY") and not buy_allowed:
+            final["signal"] = f"HOLD (Market:{regime})"
+            final["reason"] = f"[REGIME FILTER: {regime}] {final['reason']}"
 
         # Send alert only for strong BUY or SELL signals
         if (

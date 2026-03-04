@@ -12,8 +12,9 @@ supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 
 # ── Weightings ──────────────────────────────────────────────────────────
 # How much each layer contributes to final decision
-WEIGHT_TECHNICAL  = 0.60  # 60% — technical indicators
-WEIGHT_SENTIMENT  = 0.40  # 40% — news sentiment
+WEIGHT_TECHNICAL  = 0.50  # 50% — technical indicators
+WEIGHT_SENTIMENT  = 0.25  # 25% — news sentiment
+WEIGHT_ML         = 0.25  # 25% — XGBoost ML model
 
 # Minimum confidence to send an alert (avoid weak signals)
 MIN_CONFIDENCE_ALERT = 55.0
@@ -49,26 +50,26 @@ def get_sentiment_score(symbol, news_items):
 
 # ── Combine technical + sentiment ──────────────────────────────────────
 def combine_signals(technical_signal, sentiment_score):
-    """
-    Merge technical signal and sentiment into final signal
-    Returns enhanced signal with combined confidence
-    """
-    # Convert technical signal to numeric score (-100 to +100)
+    """Merge technical + sentiment + ML into final signal"""
+    from ml_model import predict_stock
+
     tech_direction = {
-        "BUY":  1,
-        "SELL": -1,
-        "HOLD": 0
+        "BUY": 1, "SELL": -1, "HOLD": 0
     }.get(technical_signal["signal"], 0)
 
     tech_score = tech_direction * technical_signal["confidence"]
 
+    # ML prediction
+    ml_prediction, ml_prob = predict_stock(technical_signal["symbol"])
+    ml_score = (ml_prob - 50) * 2  # convert 0-100% to -100 to +100
+
     # Weighted combination
     combined_score = (
-        (tech_score       * WEIGHT_TECHNICAL) +
-        (sentiment_score  * WEIGHT_SENTIMENT)
+        (tech_score    * WEIGHT_TECHNICAL) +
+        (sentiment_score * WEIGHT_SENTIMENT) +
+        (ml_score      * WEIGHT_ML)
     )
 
-    # Determine final signal
     if combined_score >= 25:
         final_signal = "BUY"
     elif combined_score <= -25:
@@ -76,10 +77,8 @@ def combine_signals(technical_signal, sentiment_score):
     else:
         final_signal = "HOLD"
 
-    # Combined confidence
     combined_confidence = round(min(abs(combined_score), 95.0), 1)
 
-    # Sentiment label for reason
     if sentiment_score > 10:
         sentiment_label = f"Sentiment BULLISH ({sentiment_score:+.1f})"
     elif sentiment_score < -10:
@@ -87,7 +86,8 @@ def combine_signals(technical_signal, sentiment_score):
     else:
         sentiment_label = "Sentiment NEUTRAL"
 
-    full_reason = f"{technical_signal['reason']} | {sentiment_label}"
+    ml_label = f"ML {ml_prediction} ({ml_prob}%)" if ml_prediction else "ML N/A"
+    full_reason = f"{technical_signal['reason']} | {sentiment_label} | {ml_label}"
 
     return {
         "symbol":          technical_signal["symbol"],
@@ -98,10 +98,10 @@ def combine_signals(technical_signal, sentiment_score):
         "macd":            technical_signal["macd"],
         "tech_score":      round(tech_score, 1),
         "sentiment_score": sentiment_score,
+        "ml_score":        round(ml_score, 1),
         "combined_score":  round(combined_score, 1),
         "reason":          full_reason
     }
-
 # ── Portfolio check ─────────────────────────────────────────────────────
 def check_portfolio(symbol, signal, price):
     """

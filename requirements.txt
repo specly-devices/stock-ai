@@ -6,13 +6,11 @@ beautifulsoup4
 streamlit
 plotly
 supabase
-python-telegram-bot
-apscheduler
 schedule
 scikit-learn
 xgboost
 ta
-transformers
-torch
+vaderSentiment
+textblob
 python-dotenv
 feedparser

@@ -5,21 +5,15 @@ import re
 from datetime import datetime
 from dotenv import load_dotenv
 from supabase import create_client
-from transformers import pipeline
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from textblob import TextBlob
 
 load_dotenv()
 
 supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 
-# ── Load FinBERT (Finance-specific sentiment AI) ────────────────────────
-print("Loading FinBERT model (first time takes 2-3 minutes to download)...")
-sentiment_model = pipeline(
-    "text-classification",
-    model="ProsusAI/finbert",
-    truncation=True,
-    max_length=512
-)
-print("✅ FinBERT loaded")
+analyzer = SentimentIntensityAnalyzer()
+print("✅ Sentiment analyzer loaded")
 
 # ── News Sources (Indian Market RSS Feeds) ──────────────────────────────
 NEWS_FEEDS = [
@@ -110,33 +104,63 @@ def fetch_news():
     print(f"\n📰 Total unique headlines: {len(unique_news)}")
     return unique_news
 
-# ── Run FinBERT sentiment analysis ─────────────────────────────────────
 def analyze_sentiment(news_items):
-    """Score each headline with FinBERT"""
+    """Score each headline using VADER + TextBlob (lightweight, no GPU needed)"""
     results = []
 
     for item in news_items:
         try:
-            result    = sentiment_model(item["headline"])[0]
-            label     = result["label"]    # positive / negative / neutral
-            score     = result["score"]    # confidence 0-1
+            headline = item["headline"]
 
-            # Normalize label
-            sentiment_map = {
-                "positive": "BULLISH",
-                "negative": "BEARISH",
-                "neutral":  "NEUTRAL"
-            }
-            sentiment = sentiment_map.get(label.lower(), "NEUTRAL")
+            # VADER score (-1 to +1)
+            vader_scores = analyzer.polarity_scores(headline)
+            vader_compound = vader_scores["compound"]
+
+            # TextBlob score (-1 to +1)
+            blob_score = TextBlob(headline).sentiment.polarity
+
+            # Average both
+            combined = (vader_compound + blob_score) / 2
+
+            # Finance-specific keyword boosts
+            bullish_words = [
+                "surge", "rally", "gain", "profit", "growth", "beat",
+                "record", "strong", "upgrade", "buy", "outperform",
+                "expansion", "positive", "rises", "jumps", "soars"
+            ]
+            bearish_words = [
+                "fall", "drop", "loss", "crash", "decline", "miss",
+                "weak", "downgrade", "sell", "underperform", "cut",
+                "negative", "falls", "tumbles", "plunges", "concern"
+            ]
+
+            headline_lower = headline.lower()
+            for word in bullish_words:
+                if word in headline_lower:
+                    combined += 0.1
+            for word in bearish_words:
+                if word in headline_lower:
+                    combined -= 0.1
+
+            combined = max(-1, min(1, combined))  # clamp to -1 to +1
+
+            # Convert to label
+            if combined >= 0.05:
+                sentiment = "BULLISH"
+            elif combined <= -0.05:
+                sentiment = "BEARISH"
+            else:
+                sentiment = "NEUTRAL"
+
+            score = round(abs(combined) * 100, 1)
 
             item["sentiment"]       = sentiment
-            item["sentiment_score"] = round(score * 100, 1)
+            item["sentiment_score"] = score
             item["related_symbol"]  = match_symbol(item["headline"])
-
             results.append(item)
 
         except Exception as e:
-            print(f"❌ Sentiment failed for: {item['headline'][:50]} — {e}")
+            print(f"❌ Sentiment failed: {e}")
 
     return results
 

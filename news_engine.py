@@ -61,6 +61,25 @@ STOCK_KEYWORDS = {
     "WIPRO.NS":      ["wipro"],
     "HINDUNILVR.NS": ["hindustan unilever", "hul"],
     "ULTRACEMCO.NS": ["ultratech cement", "ultratech"]
+    # Mid & Small Cap additions
+    "TATAMOTORS.NS":  ["tata motors", "tatamotors"],
+    "ADANIENT.NS":    ["adani enterprises", "adani ent"],
+    "ADANIPORTS.NS":  ["adani ports", "adaniports"],
+    "JSWSTEEL.NS":    ["jsw steel", "jswsteel"],
+    "TATASTEEL.NS":   ["tata steel", "tatasteel"],
+    "HINDALCO.NS":    ["hindalco"],
+    "VEDL.NS":        ["vedanta", "vedl"],
+    "DRREDDY.NS":     ["dr reddy", "drreddy"],
+    "CIPLA.NS":       ["cipla"],
+    "BAJAJ-AUTO.NS":  ["bajaj auto"],
+    "HEROMOTOCO.NS":  ["hero moto", "hero motocorp"],
+    "EICHERMOT.NS":   ["eicher", "royal enfield"],
+    "TATAPOWER.NS":   ["tata power"],
+    "DLF.NS":         ["dlf"],
+    "PERSISTENT.NS":  ["persistent systems"],
+    "COFORGE.NS":     ["coforge"],
+    "KPITTECH.NS":    ["kpit tech", "kpit"],
+    "TATAELXSI.NS":   ["tata elxsi"],
 }
 
 # ── Match headline to stock symbol ──────────────────────────────────────

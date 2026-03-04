@@ -14,10 +14,47 @@ supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 # ── Indian Stocks Watchlist ─────────────────────────────────────────────
 # These are Nifty 50 top stocks — you can add/remove any
 WATCHLIST = [
+    # Nifty 50 Large Cap
     "RELIANCE.NS", "TCS.NS", "HDFCBANK.NS", "INFY.NS", "ICICIBANK.NS",
     "HINDUNILVR.NS", "SBIN.NS", "BHARTIARTL.NS", "ITC.NS", "KOTAKBANK.NS",
     "LT.NS", "HCLTECH.NS", "AXISBANK.NS", "ASIANPAINT.NS", "MARUTI.NS",
-    "SUNPHARMA.NS", "TITAN.NS", "ULTRACEMCO.NS", "BAJFINANCE.NS", "WIPRO.NS"
+    "SUNPHARMA.NS", "TITAN.NS", "ULTRACEMCO.NS", "BAJFINANCE.NS", "WIPRO.NS",
+    "NESTLEIND.NS", "POWERGRID.NS", "NTPC.NS", "TECHM.NS", "ONGC.NS",
+    "TATAMOTORS.NS", "ADANIENT.NS", "ADANIPORTS.NS", "COALINDIA.NS", "JSWSTEEL.NS",
+
+    # Mid Cap
+    "PIDILITIND.NS", "MUTHOOTFIN.NS", "LUPIN.NS", "BIOCON.NS", "AUROPHARMA.NS",
+    "VOLTAS.NS", "TATACOMM.NS", "PERSISTENT.NS", "COFORGE.NS", "LTIM.NS",
+    "INDHOTEL.NS", "ABCAPITAL.NS", "FEDERALBNK.NS", "IDFCFIRSTB.NS", "RBLBANK.NS",
+    "CHOLAFIN.NS", "MFSL.NS", "APLLTD.NS", "ALKEM.NS", "TORNTPHARM.NS",
+
+    # Small Cap — High momentum
+    "TANLA.NS", "HAPPSTMNDS.NS", "ROUTE.NS", "CLEAN.NS", "NAZARA.NS",
+    "LATENTVIEW.NS", "INTELLECT.NS", "KPITTECH.NS", "TATAELXSI.NS", "RAILTEL.NS",
+
+    # Sectors — Banking
+    "BANDHANBNK.NS", "INDUSINDBK.NS", "AUBANK.NS", "CANBK.NS", "BANKBARODA.NS",
+
+    # Sectors — IT
+    "MPHASIS.NS", "LTTS.NS", "CYIENT.NS", "NIITTECH.NS", "HEXAWARE.NS",
+
+    # Sectors — Auto
+    "BAJAJ-AUTO.NS", "HEROMOTOCO.NS", "EICHERMOT.NS", "TVSMOTOR.NS", "MOTHERSON.NS",
+
+    # Sectors — Pharma
+    "DRREDDY.NS", "CIPLA.NS", "DIVISLAB.NS", "GLENMARK.NS", "IPCALAB.NS",
+
+    # Sectors — Energy
+    "TATAPOWER.NS", "ADANIGREEN.NS", "ADANITRANS.NS", "CESC.NS", "TORNTPOWER.NS",
+
+    # Sectors — FMCG
+    "DABUR.NS", "MARICO.NS", "COLPAL.NS", "EMAMILTD.NS", "GODREJCP.NS",
+
+    # Sectors — Metals
+    "TATASTEEL.NS", "HINDALCO.NS", "VEDL.NS", "SAIL.NS", "NATIONALUM.NS",
+
+    # Sectors — Real Estate
+    "DLF.NS", "GODREJPROP.NS", "OBEROIRLTY.NS", "PRESTIGE.NS", "BRIGADE.NS",
 ]
 
 # ── Fetch Stock Data ────────────────────────────────────────────────────

@@ -33,10 +33,14 @@ def send_email(subject, body):
     """Send email alert via Gmail"""
     try:
         msg = MIMEMultipart()
-        msg["From"] = GMAIL_ADDRESS
-        msg["To"] = ALERT_EMAIL
+        msg["From"]    = GMAIL_ADDRESS
+        msg["To"]      = ALERT_EMAIL
         msg["Subject"] = subject
-        msg.attach(MIMEText(body, "plain"))
+
+        if body.strip().startswith("<!DOCTYPE") or body.strip().startswith("<html"):
+            msg.attach(MIMEText(body, "html"))
+        else:
+            msg.attach(MIMEText(body, "plain"))
 
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
             server.login(GMAIL_ADDRESS, GMAIL_APP_PASSWORD)

@@ -5,6 +5,7 @@ from supabase import create_client
 from data_pipeline import run_pipeline, fetch_stock_data, calculate_indicators, generate_signal
 from news_engine import run_news_engine
 from alerts import send_alert
+from risk_manager import run_risk_check
 
 load_dotenv()
 
@@ -169,6 +170,9 @@ def run_combiner():
     print(f"\n{'='*60}")
     print(f"Signal Combiner started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"{'='*60}\n")
+    # Run risk check on portfolio
+    print("\n🛡️  Running portfolio risk check...")
+    run_risk_check()
 
     # Step 1: Run technical analysis
     print("📊 Step 1: Running technical analysis...")

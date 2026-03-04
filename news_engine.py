@@ -62,7 +62,7 @@ STOCK_KEYWORDS = {
     "HINDUNILVR.NS": ["hindustan unilever", "hul"],
     "ULTRACEMCO.NS": ["ultratech cement", "ultratech"]
     # Mid & Small Cap additions
-    "TATAMOTORS.NS":  ["tata motors", "tatamotors"],
+    "M&M.NS":  ["tata motors", "tatamotors"],
     "ADANIENT.NS":    ["adani enterprises", "adani ent"],
     "ADANIPORTS.NS":  ["adani ports", "adaniports"],
     "JSWSTEEL.NS":    ["jsw steel", "jswsteel"],

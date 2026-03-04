@@ -36,3 +36,30 @@ jobs:
           ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         run: python signal_combiner.py
+
+name: Weekly Model Retrain
+
+on:
+  schedule:
+    - cron: '0 2 * * 0'  # Every Sunday 7:30 AM IST
+  workflow_dispatch:
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Retrain model
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python ml_model.py

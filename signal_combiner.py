@@ -8,6 +8,7 @@ from alerts import send_alert
 from risk_manager import run_risk_check
 from stock_filter import get_stock_tier
 from market_regime import get_market_regime, should_allow_buy, get_regime_multiplier
+from economic_calendar import should_avoid_trade, get_market_calendar_status
 
 load_dotenv()
 
@@ -192,6 +193,9 @@ def run_combiner():
     regime_multiplier = get_regime_multiplier(regime)
     print(f"   Regime: {regime} | Score: {regime_score:+.3f} | "
           f"Confidence multiplier: {regime_multiplier}x\n")
+    # Step 0b: Check economic calendar
+    cal_status, cal_msg = get_market_calendar_status()
+    print(f"📅 Calendar Status: {cal_status} — {cal_msg}\n")
     # Step 1: Run technical analysis
     print("📊 Step 1: Running technical analysis...")
     technical_signals = run_pipeline()
@@ -247,6 +251,15 @@ def run_combiner():
         if final["signal"].startswith("BUY") and not buy_allowed:
             final["signal"] = f"HOLD (Market:{regime})"
             final["reason"] = f"[REGIME FILTER: {regime}] {final['reason']}"
+
+            # Check economic calendar
+        if final["signal"].startswith("BUY"):
+            avoid, cal_reason, _ = should_avoid_trade(
+                final["symbol"], days_buffer=2
+            )
+            if avoid:
+                final["signal"] = "HOLD (Event)"
+                final["reason"] = f"[CALENDAR: {cal_reason}] {final['reason']}"
 
         # Send alert only for strong BUY or SELL signals
         if (

@@ -556,7 +556,7 @@ with tabs[0]:
                 name="EMA 200"
             ))
             fig.update_layout(
-                height=320, paper_bgcolor="transparent",
+                height=320, paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="#0d1117",
                 xaxis=dict(showgrid=False, color="#64748b",
                            rangeslider=dict(visible=False)),
@@ -586,7 +586,7 @@ with tabs[0]:
                 textfont=dict(color="#e2e8f0", size=11, family="DM Mono")
             ))
             fig2.update_layout(
-                height=320, paper_bgcolor="transparent",
+                height=320, paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="#0d1117",
                 xaxis=dict(showgrid=True, gridcolor="#1e2d45",
                            color="#64748b", zeroline=True,
@@ -920,7 +920,7 @@ with tabs[2]:
                     showarrow=False
                 )
                 fig_pie.update_layout(
-                    height=320, paper_bgcolor="transparent",
+                    height=320, paper_bgcolor="rgba(0,0,0,0)",
                     showlegend=False,
                     margin=dict(l=0, r=0, t=0, b=0)
                 )
@@ -1101,7 +1101,7 @@ with tabs[4]:
                         row=3, col=1)
 
         fig_c.update_layout(
-            height=600, paper_bgcolor="transparent",
+            height=600, paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="#0d1117",
             xaxis=dict(showgrid=False, color="#64748b",
                        rangeslider=dict(visible=False)),

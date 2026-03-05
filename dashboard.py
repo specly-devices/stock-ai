@@ -369,6 +369,40 @@ def format_time(ts_str):
     except:
         return str(ts_str)[:16]
 
+def trade_levels_html(price):
+    """Generate entry/SL/T1/T2 trade level boxes for a given price."""
+    p  = float(price)
+    sl = round(p * 0.97, 2)
+    t1 = round(p * 1.04, 2)
+    t2 = round(p * 1.08, 2)
+    return f"""
+    <div style="margin-top:10px;padding:8px 10px;background:#080c14;
+                border-radius:8px;display:flex;gap:6px;flex-wrap:wrap">
+        <div style="background:rgba(68,136,255,0.1);border:1px solid rgba(68,136,255,0.3);
+                    border-radius:5px;padding:3px 8px;font-size:10px;font-family:monospace">
+            <span style="color:#64748b">Entry</span>
+            <span style="color:#4488ff;font-weight:700;margin-left:4px">₹{p:,.2f}</span>
+        </div>
+        <div style="background:rgba(255,68,102,0.1);border:1px solid rgba(255,68,102,0.3);
+                    border-radius:5px;padding:3px 8px;font-size:10px;font-family:monospace">
+            <span style="color:#64748b">SL</span>
+            <span style="color:#ff4466;font-weight:700;margin-left:4px">₹{sl:,.2f}</span>
+            <span style="color:#475569;font-size:9px"> -3%</span>
+        </div>
+        <div style="background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);
+                    border-radius:5px;padding:3px 8px;font-size:10px;font-family:monospace">
+            <span style="color:#64748b">T1</span>
+            <span style="color:#00ff88;font-weight:700;margin-left:4px">₹{t1:,.2f}</span>
+            <span style="color:#475569;font-size:9px"> +4%</span>
+        </div>
+        <div style="background:rgba(0,255,136,0.15);border:1px solid rgba(0,255,136,0.4);
+                    border-radius:5px;padding:3px 8px;font-size:10px;font-family:monospace">
+            <span style="color:#64748b">T2</span>
+            <span style="color:#00ff88;font-weight:700;margin-left:4px">₹{t2:,.2f}</span>
+            <span style="color:#475569;font-size:9px"> +8%</span>
+        </div>
+    </div>"""
+
 # ── Header ────────────────────────────────────────────────────────────────
 col_logo, col_indices = st.columns([1, 3])
 
@@ -728,6 +762,7 @@ with tabs[1]:
                 conf  = float(row.get("confidence", 0))
                 color = signal_color(sig)
                 reason = str(row.get("reason",""))[:80] + "..." if len(str(row.get("reason",""))) > 80 else str(row.get("reason",""))
+                price = float(row.get("price", 0))
 
                 with cols[i % 4]:
                     st.markdown(f"""
@@ -739,7 +774,7 @@ with tabs[1]:
                             <span class="badge {badge}">{sig.split()[0]}</span>
                         </div>
                         <div class="ticker-price" style="margin-bottom:4px">
-                            ₹{float(row.get('price',0)):,.2f}</div>
+                            ₹{price:,.2f}</div>
                         <div style="display:flex;justify-content:space-between;
                                     font-size:12px;color:#94a3b8;margin-bottom:4px">
                             <span>RSI: {float(row.get('rsi',0)):.1f}</span>
@@ -747,35 +782,9 @@ with tabs[1]:
                                 {conf:.1f}%</span>
                         </div>
                         {conf_bar_html(conf, color)}
-                       <div style="font-size:10px;color:#475569;margin-top:8px;
+                        <div style="font-size:10px;color:#475569;margin-top:8px;
                                     line-height:1.4">{reason}</div>
-                        {"" if not sig.startswith("BUY") else f'''
-                        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-                            <div style="background:#4a001022;border:1px solid #ff446633;
-                                        border-radius:5px;padding:3px 8px;font-size:10px">
-                                <span style="color:#64748b">SL</span>
-                                <span style="color:#ff4466;font-family:monospace;
-                                             font-weight:700;margin-left:4px">
-                                    ₹{round(float(row.get("price",0))*0.97,2)}</span>
-                                <span style="color:#475569;font-size:9px"> -3%</span>
-                            </div>
-                            <div style="background:#06400022;border:1px solid #00ff8833;
-                                        border-radius:5px;padding:3px 8px;font-size:10px">
-                                <span style="color:#64748b">T1</span>
-                                <span style="color:#00ff88;font-family:monospace;
-                                             font-weight:700;margin-left:4px">
-                                    ₹{round(float(row.get("price",0))*1.04,2)}</span>
-                                <span style="color:#475569;font-size:9px"> +4%</span>
-                            </div>
-                            <div style="background:#06400022;border:1px solid #00ff8833;
-                                        border-radius:5px;padding:3px 8px;font-size:10px">
-                                <span style="color:#64748b">T2</span>
-                                <span style="color:#00ff88;font-family:monospace;
-                                             font-weight:700;margin-left:4px">
-                                    ₹{round(float(row.get("price",0))*1.08,2)}</span>
-                                <span style="color:#475569;font-size:9px"> +8%</span>
-                            </div>
-                        </div>'''}
+                        {trade_levels_html(price) if sig.startswith("BUY") else ""}
                         <div style="font-size:10px;color:#334155;margin-top:4px">
                             {format_time(row.get('created_at',''))}</div>
                     </div>
@@ -817,10 +826,10 @@ with tabs[2]:
                 total_inv  += bp * qty
                 total_curr += cp * qty
                 rows.append({
-                    "symbol": sym.replace(".NS","").replace(".BO",""),
-                    "buy":    bp, "current": cp, "qty": int(qty),
-                    "pnl_rs": pnl_rs, "pnl_pct": pnl_pct,
-                    "week":   wk_chg, "value": cp * qty
+                    "symbol":  sym.replace(".NS","").replace(".BO",""),
+                    "buy":     bp, "current": cp, "qty": int(qty),
+                    "pnl_rs":  pnl_rs, "pnl_pct": pnl_pct,
+                    "week":    wk_chg, "value": cp * qty
                 })
             except:
                 pass
@@ -887,6 +896,7 @@ with tabs[2]:
                             </div>
                         </div>
                         {conf_bar_html(min(abs(r['pnl_pct'])*5,100), pc)}
+                        {trade_levels_html(r['buy'])}
                     </div>
                     """, unsafe_allow_html=True)
 
@@ -1079,20 +1089,16 @@ with tabs[4]:
         ), row=2, col=1)
 
         # RSI
-        rsi_colors = []
-        for r in df_chart["RSI"].fillna(50):
-            if r >= 70:   rsi_colors.append("#ff4466")
-            elif r <= 30: rsi_colors.append("#00ff88")
-            else:         rsi_colors.append("#4488ff")
-
         fig_c.add_trace(go.Scatter(
             x=df_chart.index, y=df_chart["RSI"],
             line=dict(color="#a855f7", width=1.5),
             name="RSI", showlegend=False
         ), row=3, col=1)
-        fig_c.add_hline(y=70, line=dict(color="#ff446644", dash="dot"),
+
+        # FIX: use rgba() instead of 8-digit hex — Plotly does not support 8-digit hex
+        fig_c.add_hline(y=70, line=dict(color="rgba(255,68,102,0.4)", dash="dot"),
                         row=3, col=1)
-        fig_c.add_hline(y=30, line=dict(color="#00ff8844", dash="dot"),
+        fig_c.add_hline(y=30, line=dict(color="rgba(0,255,136,0.4)", dash="dot"),
                         row=3, col=1)
 
         fig_c.update_layout(
@@ -1121,6 +1127,18 @@ with tabs[4]:
         with s3: st.metric("EMA 9",  f"₹{latest_row['EMA9']:,.2f}")
         with s4: st.metric("EMA 21", f"₹{latest_row['EMA21']:,.2f}")
         with s5: st.metric("EMA 50", f"₹{latest_row['EMA50']:,.2f}")
+
+        # Trade levels for this chart stock
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown('<div class="section-label">Trade Levels at Current Price</div>',
+                    unsafe_allow_html=True)
+        cp = float(latest_row["Close"])
+        tl1, tl2, tl3, tl4, tl5 = st.columns(5)
+        with tl1: st.metric("📍 Entry",      f"₹{cp:,.2f}")
+        with tl2: st.metric("🛑 Stop Loss",  f"₹{round(cp*0.97,2):,.2f}", delta="-3%", delta_color="inverse")
+        with tl3: st.metric("🎯 Target 1",   f"₹{round(cp*1.04,2):,.2f}", delta="+4%")
+        with tl4: st.metric("🎯 Target 2",   f"₹{round(cp*1.08,2):,.2f}", delta="+8%")
+        with tl5: st.metric("⚖️ Risk/Reward", f"1:{round((cp*1.04-cp)/(cp-cp*0.97),2)}")
 
 # ══════════════════════════════════════════════════════════════════════════
 # TAB 6 — SCREENER
@@ -1178,12 +1196,25 @@ with tabs[5]:
         """, unsafe_allow_html=True)
 
         if not screened.empty:
+            # Add trade level columns
+            screened = screened.copy()
+            screened["Entry"]     = screened["price"].apply(lambda x: round(float(x), 2))
+            screened["Stop Loss"] = screened["price"].apply(lambda x: round(float(x)*0.97, 2))
+            screened["Target 1"]  = screened["price"].apply(lambda x: round(float(x)*1.04, 2))
+            screened["Target 2"]  = screened["price"].apply(lambda x: round(float(x)*1.08, 2))
+
             display = screened[[
-                c for c in ["symbol","signal","price","confidence","rsi","macd"]
+                c for c in ["symbol","signal","price","confidence","rsi",
+                             "Entry","Stop Loss","Target 1","Target 2"]
                 if c in screened.columns
             ]].copy()
             display["symbol"] = display["symbol"].str.replace(".NS","").str.replace(".BO","")
             display.columns = [c.upper() for c in display.columns]
+
+            fmt = {"PRICE": "₹{:,.2f}", "CONFIDENCE": "{:.1f}%", "RSI": "{:.1f}",
+                   "ENTRY": "₹{:,.2f}", "STOP LOSS": "₹{:,.2f}",
+                   "TARGET 1": "₹{:,.2f}", "TARGET 2": "₹{:,.2f}"}
+            fmt = {k: v for k, v in fmt.items() if k in display.columns}
 
             st.dataframe(
                 display.style.applymap(
@@ -1192,11 +1223,7 @@ with tabs[5]:
                     else ("color: #ff4466; font-weight: bold"
                           if str(v).startswith("SELL") else ""),
                     subset=["SIGNAL"] if "SIGNAL" in display.columns else []
-                ).format({
-                    "PRICE":      "₹{:,.2f}",
-                    "CONFIDENCE": "{:.1f}%",
-                    "RSI":        "{:.1f}",
-                }),
+                ).format(fmt),
                 use_container_width=True,
                 height=500
             )
@@ -1285,7 +1312,7 @@ with tabs[6]:
         dt       = datetime.strptime(d, "%Y-%m-%d").date()
         past     = dt < today
         color    = "#334155" if past else "#ff4466"
-        bg       = "#0d1117" if past else "#4a001022"
+        bg       = "#0d1117" if past else "rgba(74,0,16,0.13)"
         label    = "PAST" if past else ("UPCOMING" if dt > today else "TODAY")
         with rbi_cols[i % 3]:
             st.markdown(f"""

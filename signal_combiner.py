@@ -266,11 +266,15 @@ def run_combiner():
             final["signal"].startswith("BUY") or final["signal"].startswith("SELL")
         ) and final["confidence"] >= MIN_CONFIDENCE_ALERT:
             send_alert(
-                symbol=symbol,
-                signal=final["signal"],
-                price=final["price"],
-                confidence=final["confidence"],
-                reason=final["reason"]
+                 symbol=final["symbol"],
+                    signal=final["signal"],
+                    price=final["price"],
+                    confidence=final["confidence"],
+                    reason=final["reason"],
+                    entry=final["price"],
+                    stop_loss=round(final["price"] * 0.97, 2),
+                    target1=round(final["price"] * 1.04, 2),
+                    target2=round(final["price"] * 1.08, 2)
             )
             alerts_sent += 1
 

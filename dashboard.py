@@ -862,6 +862,38 @@ with tabs[2]:
                         {conf_bar_html(min(abs(r['pnl_pct'])*5,100), pc)}
                     </div>
                     """, unsafe_allow_html=True)
+                    # Trade levels
+                    sl  = round(r['current'] * 0.97, 2)
+                    t1  = round(r['current'] * 1.04, 2)
+                    t2  = round(r['current'] * 1.08, 2)
+                    sl_pct = -3.0
+                    t1_pct = 4.0
+                    t2_pct = 8.0
+                    st.markdown(f"""
+                    <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap">
+                        <div style="background:#4a001022;border:1px solid #ff446633;
+                                    border-radius:6px;padding:4px 10px;font-size:11px">
+                            <span style="color:#64748b">Stop Loss</span>
+                            <span style="color:#ff4466;font-family:'DM Mono',monospace;
+                                         font-weight:700;margin-left:6px">
+                                ₹{sl} ({sl_pct}%)</span>
+                        </div>
+                        <div style="background:#06400022;border:1px solid #00ff8833;
+                                    border-radius:6px;padding:4px 10px;font-size:11px">
+                            <span style="color:#64748b">T1</span>
+                            <span style="color:#00ff88;font-family:'DM Mono',monospace;
+                                         font-weight:700;margin-left:6px">
+                                ₹{t1} (+{t1_pct}%)</span>
+                        </div>
+                        <div style="background:#06400022;border:1px solid #00ff8833;
+                                    border-radius:6px;padding:4px 10px;font-size:11px">
+                            <span style="color:#64748b">T2</span>
+                            <span style="color:#00ff88;font-family:'DM Mono',monospace;
+                                         font-weight:700;margin-left:6px">
+                                ₹{t2} (+{t2_pct}%)</span>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
             with ch2:
                 st.markdown('<div class="section-label">Allocation</div>',
@@ -1454,4 +1486,3 @@ with st.sidebar:
         {datetime.now().strftime('%d %b %Y %H:%M:%S')}
     </div>
     """, unsafe_allow_html=True)
-    

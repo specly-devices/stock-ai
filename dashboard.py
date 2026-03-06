@@ -261,6 +261,18 @@ def get_events():
         return ge(days_ahead=30)
     except: return []
 
+@st.cache_data(ttl=300)
+def get_stock_price(symbol):
+    """Cached per-stock price fetch - avoids live yfinance calls on every widget interaction."""
+    try:
+        df = yf.Ticker(symbol).history(period="5d")
+        if df.empty: return None, None, 0.0
+        cp = float(df["Close"].iloc[-1])
+        op = float(df["Close"].iloc[0])
+        wc = (cp - op) / op * 100 if len(df) > 1 else 0.0
+        return cp, op, wc
+    except: return None, None, 0.0
+
 # ── HELPERS ───────────────────────────────────────────────────────────────
 def sig_color(s):
     s = str(s)
@@ -316,8 +328,10 @@ st.markdown(f'<div class="istrip">{items}</div>', unsafe_allow_html=True)
 # ── TABS ──────────────────────────────────────────────────────────────────
 tabs = st.tabs(["Overview","Signals","Portfolio","News Feed","Charts","Screener","Calendar","Engine"])
 
-# ══ TAB 1 — OVERVIEW ══════════════════════════════════════════════════════
-with tabs[0]:
+@st.fragment
+def tab_overview():
+    # ══ TAB 1 — OVERVIEW ══════════════════════════════════════════════════════
+
     regime, rscore, rdet = load_market_regime()
     ni = rdet.get("nifty",{}); vi = rdet.get("vix",{})
     RSTYLE = {
@@ -406,8 +420,12 @@ with tabs[0]:
         else: st.info("No high conviction signals right now.")
     else: st.info("No data yet. Run the engine.")
 
-# ══ TAB 2 — SIGNALS ═══════════════════════════════════════════════════════
-with tabs[1]:
+
+
+@st.fragment
+def tab_signals():
+    # ══ TAB 2 — SIGNALS ═══════════════════════════════════════════════════════
+
     sdf=load_signals()
     if sdf.empty: st.info("No signals yet. Run the engine.")
     else:
@@ -449,8 +467,12 @@ with tabs[1]:
                       <div style="font-family:'Fira Code',monospace;font-size:9px;color:#2e2e34;margin-top:4px">{fmt_t(row.get('created_at',''))}</div>
                     </div>""", unsafe_allow_html=True)
 
-# ══ TAB 3 — PORTFOLIO ═════════════════════════════════════════════════════
-with tabs[2]:
+
+
+@st.fragment
+def tab_portfolio():
+    # ══ TAB 3 — PORTFOLIO ═════════════════════════════════════════════════════
+
     portfolio=load_portfolio()
     if not portfolio:
         st.markdown('<div style="text-align:center;padding:4rem;color:#5a5a66"><div style="font-family:\'Playfair Display\',serif;font-size:3rem;opacity:.15;margin-bottom:1rem">&#9650;</div><div style="font-family:\'Fira Code\',monospace;font-size:9px;letter-spacing:3px">NO HOLDINGS &nbsp;&bull;&nbsp; ADD VIA ENGINE TAB</div></div>', unsafe_allow_html=True)
@@ -460,10 +482,9 @@ with tabs[2]:
             try:
                 sym=h["symbol"]; bp=float(h.get("buy_price",0)); qty=float(h.get("quantity",0))
                 if not bp or not qty: continue
-                df=yf.Ticker(sym).history(period="5d")
-                cp=float(df["Close"].iloc[-1]) if not df.empty else bp
+                cp, op, wc = get_stock_price(sym)
+                if cp is None: cp = bp
                 prs=(cp-bp)*qty; ppc=(cp-bp)/bp*100
-                wc=(cp-float(df["Close"].iloc[0]))/float(df["Close"].iloc[0])*100 if len(df)>1 else 0
                 ti+=bp*qty; tc+=cp*qty
                 rows.append({"sym":sym.replace(".NS","").replace(".BO",""),"buy":bp,"cur":cp,"qty":int(qty),"prs":prs,"ppc":ppc,"wc":wc,"val":cp*qty})
             except: pass
@@ -508,8 +529,12 @@ with tabs[2]:
                 fig_pie.update_layout(**pt(280),showlegend=False)
                 st.plotly_chart(fig_pie,use_container_width=True)
 
-# ══ TAB 4 — NEWS ══════════════════════════════════════════════════════════
-with tabs[3]:
+
+
+@st.fragment
+def tab_news():
+    # ══ TAB 4 — NEWS ══════════════════════════════════════════════════════════
+
     ndf=load_news()
     if ndf.empty: st.info("No news data yet.")
     else:
@@ -534,8 +559,12 @@ with tabs[3]:
             src=str(row.get("source","")); hl=str(row.get("headline",""))
             st.markdown(f'<div class="ncard {sb2}"><div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:flex-start"><div style="flex:1;min-width:200px"><div class="nhead">{hl}</div><div class="nmeta">{src} &nbsp;&bull;&nbsp; {sym} &nbsp;&bull;&nbsp; {fmt_t(row.get("published_at",""))}</div></div><div style="text-align:right;flex-shrink:0"><span class="badge {st2}">{sent}</span><div style="font-family:\'Fira Code\',monospace;font-size:11px;color:{sc3};margin-top:5px">{score:+.3f}</div></div></div></div>', unsafe_allow_html=True)
 
-# ══ TAB 5 — CHARTS ════════════════════════════════════════════════════════
-with tabs[4]:
+
+
+@st.fragment
+def tab_charts():
+    # ══ TAB 5 — CHARTS ════════════════════════════════════════════════════════
+
     sdf=load_signals()
     syms=sorted(sdf["symbol"].dropna().unique().tolist()) if not sdf.empty else ["RELIANCE.NS","TCS.NS","HDFCBANK.NS"]
     cc1,cc2=st.columns([2,1])
@@ -578,8 +607,12 @@ with tabs[4]:
         with tl4: st.metric("Target 2",     f"₹{t2:,.2f}",delta="+8%")
         with tl5: st.metric("Risk/Reward",  f"1 : {rr}")
 
-# ══ TAB 6 — SCREENER ══════════════════════════════════════════════════════
-with tabs[5]:
+
+
+@st.fragment
+def tab_screener():
+    # ══ TAB 6 — SCREENER ══════════════════════════════════════════════════════
+
     sdf=load_signals()
     if sdf.empty: st.info("No signal data.")
     else:
@@ -610,8 +643,12 @@ with tabs[5]:
             fmt={k:v for k,v in {"PRICE":"₹{:,.2f}","CONFIDENCE":"{:.1f}%","RSI":"{:.1f}","ENTRY":"₹{:,.2f}","STOP LOSS":"₹{:,.2f}","TARGET 1":"₹{:,.2f}","TARGET 2":"₹{:,.2f}"}.items() if k in disp.columns}
             st.dataframe(disp.style.applymap(lambda v:"color:#00e87a;font-weight:bold" if str(v).startswith("BUY") else ("color:#ff4d6a;font-weight:bold" if str(v).startswith("SELL") else ""),subset=["SIGNAL"] if "SIGNAL" in disp.columns else []).format(fmt),use_container_width=True,height=520)
 
-# ══ TAB 7 — CALENDAR ══════════════════════════════════════════════════════
-with tabs[6]:
+
+
+@st.fragment
+def tab_calendar():
+    # ══ TAB 7 — CALENDAR ══════════════════════════════════════════════════════
+
     events=get_events(); today=datetime.now().date()
     IMPACT={"EXTREME":("#ff4d6a","rgba(255,77,106,.06)","rgba(255,77,106,.25)"),"HIGH":("#ff8f3c","rgba(255,143,60,.05)","rgba(255,143,60,.2)"),"MEDIUM":("#4d9fff","rgba(77,159,255,.04)","rgba(77,159,255,.15)"),"HOLIDAY":("#5a5a66","rgba(90,90,102,.03)","rgba(90,90,102,.12)")}
     st.markdown('<div class="sh">Economic Calendar &nbsp;&bull;&nbsp; Next 30 Days</div>', unsafe_allow_html=True)
@@ -634,8 +671,12 @@ with tabs[6]:
         with rcols[i%3]:
             st.markdown(f'<div style="background:{"#1a1a1d" if past else "rgba(255,77,106,.04)"};border:1px solid {c2}55;border-left:3px solid {c2};border-radius:5px;padding:.85rem 1rem;margin-bottom:.5rem;opacity:{"0.35" if past else "1"}"><div style="font-family:\'Playfair Display\',serif;font-size:13px;font-weight:600;color:{c2}">{dt2.strftime("%d %B %Y")}</div><div style="font-family:\'Fira Code\',monospace;font-size:8px;letter-spacing:2px;color:{c2}88;margin-top:3px;text-transform:uppercase">RBI Policy &nbsp;&bull;&nbsp; {lbl}</div></div>', unsafe_allow_html=True)
 
-# ══ TAB 8 — ENGINE ════════════════════════════════════════════════════════
-with tabs[7]:
+
+
+@st.fragment
+def tab_engine():
+    # ══ TAB 8 — ENGINE ════════════════════════════════════════════════════════
+
     st.markdown('<div class="sh">Engine Controls</div>', unsafe_allow_html=True)
     e1,e2,e3=st.columns(3)
     for col,title,desc,icon,fn,mod in [(e1,"Full Engine","Technical · News · ML · Risk","&#9650;","run_combiner","signal_combiner"),(e2,"News Scan","Refresh sentiment & headlines","&#9711;","run_news_engine","news_engine"),(e3,"Risk Check","Portfolio stop-loss monitor","&#9675;","run_risk_check","risk_manager")]:
@@ -645,7 +686,9 @@ with tabs[7]:
             if st.button(f"Run {title}",use_container_width=True,key=f"btn_{fn}"):
                 with st.spinner(f"Running {title}..."):
                     try:
-                        m=__import__(mod); getattr(m,fn)(); st.success(f"✅ {title} completed"); st.cache_data.clear()
+                        m=__import__(mod); getattr(m,fn)()
+                        load_signals.clear(); load_news.clear(); load_portfolio.clear(); get_stock_price.clear()
+                        st.success(f"✅ {title} completed")
                     except Exception as ex: st.error(f"❌ {ex}")
 
     st.markdown('<div class="sh">System Status</div>', unsafe_allow_html=True)
@@ -667,7 +710,9 @@ with tabs[7]:
             if add_sym and add_price>0:
                 try:
                     supabase.table("stocks").upsert({"symbol":add_sym.upper(),"company_name":add_sym.upper().replace(".NS",""),"in_portfolio":True,"buy_price":add_price,"quantity":add_qty}).execute()
-                    st.success(f"✅ Added {add_sym}"); st.cache_data.clear()
+                    load_portfolio.clear()
+                    get_stock_price.clear()
+                    st.success(f"✅ Added {add_sym}")
                 except Exception as ex: st.error(f"❌ {ex}")
 
     st.markdown('<div class="sh">Position Sizer</div>', unsafe_allow_html=True)
@@ -682,4 +727,24 @@ with tabs[7]:
                     from risk_manager import suggest_position
                     suggest_position(ps_sym,ps_port); st.success("Check terminal output")
                 except Exception as ex: st.error(f"❌ {ex}")
-                
+
+
+
+# ── RENDER TABS ──────────────────────────────────────────────────────────
+with tabs[0]:
+    tab_overview()
+with tabs[1]:
+    tab_signals()
+with tabs[2]:
+    tab_portfolio()
+with tabs[3]:
+    tab_news()
+with tabs[4]:
+    tab_charts()
+with tabs[5]:
+    tab_screener()
+with tabs[6]:
+    tab_calendar()
+with tabs[7]:
+    tab_engine()
+    

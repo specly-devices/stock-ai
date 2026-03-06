@@ -285,9 +285,9 @@ def fmt_t(ts):
     try: return pd.to_datetime(ts).strftime("%d %b  %H:%M")
     except: return str(ts)[:16]
 
-def pt(h=320):
+def pt(h=320, r=0):
     return dict(height=h, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#141416",
-                margin=dict(l=0,r=0,t=8,b=0), font=dict(family="Fira Code",color="#5a5a66"))
+                margin=dict(l=0, r=r, t=8, b=0), font=dict(family="Fira Code", color="#5a5a66"))
 
 # ── TOP BAR ───────────────────────────────────────────────────────────────
 now_str = datetime.now().strftime("%a, %d %b %Y  •  %H:%M:%S IST")
@@ -379,7 +379,7 @@ with tabs[0]:
         if sp:
             snames,svals=list(sp.keys()),list(sp.values())
             fig2=go.Figure(go.Bar(x=svals,y=snames,orientation="h",marker_color=["#00e87a" if v>=0 else "#ff4d6a" for v in svals],text=[f"{v:+.2f}%" for v in svals],textposition="outside",textfont=dict(color="#e8e8f0",size=10,family="Fira Code")))
-            fig2.update_layout(**pt(310),xaxis=dict(showgrid=True,gridcolor="#1f1f23",color="#5a5a66",zeroline=True,zerolinecolor="#2e2e34"),yaxis=dict(showgrid=False,color="#b8b8c8"),margin=dict(l=0,r=55,t=8,b=0))
+            fig2.update_layout(**pt(310,r=55),xaxis=dict(showgrid=True,gridcolor="#1f1f23",color="#5a5a66",zeroline=True,zerolinecolor="#2e2e34"),yaxis=dict(showgrid=False,color="#b8b8c8"))
             st.plotly_chart(fig2,use_container_width=True)
 
     st.markdown('<div class="sh">High Conviction Signals &nbsp;&bull;&nbsp; Entry / SL / Targets</div>', unsafe_allow_html=True)
@@ -682,4 +682,3 @@ with tabs[7]:
                     from risk_manager import suggest_position
                     suggest_position(ps_sym,ps_port); st.success("Check terminal output")
                 except Exception as ex: st.error(f"❌ {ex}")
-                

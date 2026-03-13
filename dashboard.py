@@ -360,10 +360,10 @@ def levels_html(price, is_buy, stop_loss=None, rr=None):
     t1 = round(p * 1.04, 2); t2 = round(p * 1.08, 2)
     rr_html = f'<div class="lv" style="background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:#4d9fff">RR&nbsp;1:{rr}</div>' if rr else ""
     return f"""<div class="levels">
-      <div class="lv lv-e">Entry&nbsp;&#8377;{p:,.2f}</div>
-      <div class="lv lv-sl">SL&nbsp;&#8377;{sl:,.2f}<span style="opacity:.45">&nbsp;{sl_pct:.1f}%</span></div>
-      <div class="lv lv-t1">T1&nbsp;&#8377;{t1:,.2f}<span style="opacity:.45">&nbsp;+4%</span></div>
-      <div class="lv lv-t2">T2&nbsp;&#8377;{t2:,.2f}<span style="opacity:.45">&nbsp;+8%</span></div>
+      <div class="lv lv-e">Entry&nbsp;₹{p:,.2f}</div>
+      <div class="lv lv-sl">SL&nbsp;₹{sl:,.2f}<span style="opacity:.45">&nbsp;{sl_pct:.1f}%</span></div>
+      <div class="lv lv-t1">T1&nbsp;₹{t1:,.2f}<span style="opacity:.45">&nbsp;+4%</span></div>
+      <div class="lv lv-t2">T2&nbsp;₹{t2:,.2f}<span style="opacity:.45">&nbsp;+8%</span></div>
       {rr_html}
     </div>"""
 
@@ -541,21 +541,24 @@ def tab_overview():
                 with cols[i % 3]:
                     sl = row.get("stop_loss", None); rr = row.get("risk_reward", None)
                     rr_disp = f"{float(rr):.2f}" if rr and float(rr)>0 else None
-                    st.markdown(f"""<div class="scard buy">
+                    _sec = sector_badge_html(sym)
+                    _cbar = cbar_html(conf, color)
+                    _ml = ml_html(row)
+                    _lvls = levels_html(price, True, sl, rr_disp)
+                    _rsi = float(row.get('rsi', 0))
+                    _html = f"""<div class="scard buy">
                       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
                         <span class="sname">{sym.replace('.NS','')}</span>
                         <span class="badge b-buy">{sig}</span>
                       </div>
-                      {sector_badge_html(sym)}
+                      """ + _sec + f"""
                       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:8px">
-                        <span class="spx" style="color:{color}">&#8377;{price:,.2f}</span>
+                        <span class="spx" style="color:{color}">₹{price:,.2f}</span>
                         <span class="sconf" style="color:{color}">{conf:.1f}%</span>
                       </div>
-                      <div class="srsi" style="margin-top:3px">RSI &nbsp;{float(row.get('rsi',0)):.1f}</div>
-                      {cbar_html(conf,color)}
-                      {ml_html(row)}
-                      {levels_html(price, True, sl, rr_disp)}
-                    </div>""", unsafe_allow_html=True)
+                      <div class="srsi" style="margin-top:3px">RSI &nbsp;{_rsi:.1f}</div>
+                      """ + _cbar + _ml + _lvls + "</div>"
+                    st.markdown(_html, unsafe_allow_html=True)
         else:
             st.markdown('<p style="font-family:\'Fira Code\',monospace;font-size:9px;color:#5a5a66;letter-spacing:2px;padding:1.5rem 0">NO BUY SIGNALS TODAY — ALL SECTORS WEAK OR BLOCKED</p>', unsafe_allow_html=True)
     else:
@@ -593,23 +596,27 @@ def tab_signals():
                 with cols[i % 4]:
                     sl = row.get("stop_loss",None); rr = row.get("risk_reward",None)
                     rr_disp = f"{float(rr):.2f}" if rr and float(rr)>0 else None
-                    st.markdown(f"""<div class="scard {cls}">
-                      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-                        <span class="sname">{sym.replace('.NS','')}</span>
-                        <span class="badge b-{cls}" style="{'background:rgba(0,255,170,.12);color:#00ffaa;border-color:#00ffaa' if sig=='BUY STRONG' else ''}">{sig}</span>
-                      </div>
-                      {sector_badge_html(sym)}
-                      <div class="spx" style="color:{color};margin-top:7px">&#8377;{price:,.2f}</div>
-                      <div style="display:flex;justify-content:space-between;margin:4px 0">
-                        <span class="srsi">RSI {float(row.get('rsi',0)):.1f}</span>
-                        <span class="sconf" style="color:{color}">{conf:.1f}%</span>
-                      </div>
-                      {cbar_html(conf,color)}
-                      {ml_html(row)}
-                      {levels_html(price,sig.startswith("BUY"),sl,rr_disp)}
-                      <div style="font-family:'Fira Code',monospace;font-size:9px;color:#38383f;margin-top:8px;line-height:1.6">{rsn}</div>
-                      <div style="font-family:'Fira Code',monospace;font-size:9px;color:#2e2e34;margin-top:4px">{fmt_t(row.get('created_at',''))}</div>
-                    </div>""", unsafe_allow_html=True)
+                    _sec  = sector_badge_html(sym)
+                    _cbar = cbar_html(conf,color)
+                    _ml   = ml_html(row)
+                    _lvls = levels_html(price,sig.startswith("BUY"),sl,rr_disp)
+                    _buy_style = "background:rgba(0,255,170,.12);color:#00ffaa;border-color:#00ffaa" if sig=="BUY STRONG" else ""
+                    _rsi2 = float(row.get('rsi',0))
+                    _ts   = fmt_t(row.get('created_at',''))
+                    _html = (f'<div class="scard {cls}">'
+                        f'<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+                        f'<span class="sname">{sym.replace(".NS","")}</span>'
+                        f'<span class="badge b-{cls}" style="{_buy_style}">{sig}</span>'
+                        f'</div>' + _sec +
+                        f'<div class="spx" style="color:{color};margin-top:7px">₹{price:,.2f}</div>'
+                        f'<div style="display:flex;justify-content:space-between;margin:4px 0">'
+                        f'<span class="srsi">RSI {_rsi2:.1f}</span>'
+                        f'<span class="sconf" style="color:{color}">{conf:.1f}%</span>'
+                        f'</div>' + _cbar + _ml + _lvls +
+                        f'<div style="font-family:\'Fira Code\',monospace;font-size:9px;color:#38383f;margin-top:8px;line-height:1.6">{rsn}</div>'
+                        f'<div style="font-family:\'Fira Code\',monospace;font-size:9px;color:#2e2e34;margin-top:4px">{_ts}</div>'
+                        f'</div>')
+                    st.markdown(_html, unsafe_allow_html=True)
 
 
 @st.fragment
@@ -631,9 +638,9 @@ def tab_portfolio():
             except: pass
         tp=tc-ti; tpp=(tp/ti*100) if ti else 0
         p1,p2,p3,p4 = st.columns(4)
-        with p1: st.metric("Total Invested", f"&#8377;{ti:,.0f}")
-        with p2: st.metric("Current Value",  f"&#8377;{tc:,.0f}")
-        with p3: st.metric("Total P&L",      f"&#8377;{tp:+,.0f}", delta=f"{tpp:+.2f}%")
+        with p1: st.metric("Total Invested", f"₹{ti:,.0f}")
+        with p2: st.metric("Current Value",  f"₹{tc:,.0f}")
+        with p3: st.metric("Total P&L",      f"₹{tp:+,.0f}", delta=f"{tpp:+.2f}%")
         with p4: st.metric("Holdings",       len(rows))
         if rows:
             pc1,pc2 = st.columns([2,1])
@@ -645,19 +652,19 @@ def tab_portfolio():
                     sl=round(r["buy"]*.97,2); t1=round(r["buy"]*1.04,2); t2=round(r["buy"]*1.08,2)
                     st.markdown(f"""<div class="prow" style="border-left:3px solid {pc}">
                       <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:1.2rem;align-items:center">
-                        <div><div class="prow-name">{r['sym']}</div><div class="prow-meta">{r['qty']} SHS &nbsp;&bull;&nbsp; BUY &#8377;{r['buy']:,.2f}</div></div>
-                        <div style="text-align:center"><div style="font-family:'Fira Code',monospace;font-size:8px;color:#5a5a66;letter-spacing:2px;margin-bottom:3px">LTP</div><div style="font-family:'Fira Code',monospace;font-size:1rem;font-weight:600;color:#00e87a">&#8377;{r['cur']:,.2f}</div></div>
-                        <div style="text-align:center"><div style="font-family:'Fira Code',monospace;font-size:8px;color:#5a5a66;letter-spacing:2px;margin-bottom:3px">P&amp;L</div><div style="font-family:'Fira Code',monospace;font-weight:600;color:{pc}">{r['ppc']:+.2f}%</div><div style="font-family:'Fira Code',monospace;font-size:10px;color:{pc}">&#8377;{r['prs']:+,.0f}</div></div>
+                        <div><div class="prow-name">{r['sym']}</div><div class="prow-meta">{r['qty']} SHS &nbsp;&bull;&nbsp; BUY ₹{r['buy']:,.2f}</div></div>
+                        <div style="text-align:center"><div style="font-family:'Fira Code',monospace;font-size:8px;color:#5a5a66;letter-spacing:2px;margin-bottom:3px">LTP</div><div style="font-family:'Fira Code',monospace;font-size:1rem;font-weight:600;color:#00e87a">₹{r['cur']:,.2f}</div></div>
+                        <div style="text-align:center"><div style="font-family:'Fira Code',monospace;font-size:8px;color:#5a5a66;letter-spacing:2px;margin-bottom:3px">P&amp;L</div><div style="font-family:'Fira Code',monospace;font-weight:600;color:{pc}">{r['ppc']:+.2f}%</div><div style="font-family:'Fira Code',monospace;font-size:10px;color:{pc}">₹{r['prs']:+,.0f}</div></div>
                         <div style="text-align:center"><div style="font-family:'Fira Code',monospace;font-size:8px;color:#5a5a66;letter-spacing:2px;margin-bottom:3px">WEEK</div><div style="font-family:'Fira Code',monospace;font-weight:600;color:{wc2}">{r['wc']:+.2f}%</div></div>
-                        <div style="text-align:center"><div style="font-family:'Fira Code',monospace;font-size:8px;color:#5a5a66;letter-spacing:2px;margin-bottom:3px">VALUE</div><div style="font-family:'Fira Code',monospace;font-weight:600">&#8377;{r['val']:,.0f}</div></div>
+                        <div style="text-align:center"><div style="font-family:'Fira Code',monospace;font-size:8px;color:#5a5a66;letter-spacing:2px;margin-bottom:3px">VALUE</div><div style="font-family:'Fira Code',monospace;font-weight:600">₹{r['val']:,.0f}</div></div>
                       </div>
                       <div style="margin-top:10px;padding:9px 11px;background:#1a1a1d;border-radius:4px;border:1px solid #2e2e34">
                         <div style="font-family:'Fira Code',monospace;font-size:8px;color:#5a5a66;letter-spacing:2px;margin-bottom:6px">TRADE LEVELS</div>
                         <div style="display:flex;gap:5px;flex-wrap:wrap">
-                          <div class="lv lv-e">Entry &#8377;{r['buy']:,.2f}</div>
-                          <div class="lv lv-sl">SL &#8377;{sl:,.2f}<span style="opacity:.45"> -3%</span></div>
-                          <div class="lv lv-t1">T1 &#8377;{t1:,.2f}<span style="opacity:.45"> +4%</span></div>
-                          <div class="lv lv-t2">T2 &#8377;{t2:,.2f}<span style="opacity:.45"> +8%</span></div>
+                          <div class="lv lv-e">Entry ₹{r['buy']:,.2f}</div>
+                          <div class="lv lv-sl">SL ₹{sl:,.2f}<span style="opacity:.45"> -3%</span></div>
+                          <div class="lv lv-t1">T1 ₹{t1:,.2f}<span style="opacity:.45"> +4%</span></div>
+                          <div class="lv lv-t2">T2 ₹{t2:,.2f}<span style="opacity:.45"> +8%</span></div>
                         </div>
                       </div>
                       {cbar_html(min(abs(r['ppc'])*5,100),pc)}
@@ -665,8 +672,8 @@ def tab_portfolio():
             with pc2:
                 st.markdown('<div class="sh">Allocation</div>', unsafe_allow_html=True)
                 COLORS=["#00e87a","#4d9fff","#ff8f3c","#a855f7","#00c066","#ff4d6a","#f0e040","#5de3a8"]
-                fig_pie=go.Figure(go.Pie(labels=[r["sym"] for r in rows],values=[r["val"] for r in rows],hole=0.68,marker_colors=COLORS[:len(rows)],textinfo="label+percent",textfont=dict(family="Fira Code",size=10,color="#e8e8f0"),hovertemplate="<b>%{label}</b><br>&#8377;%{value:,.0f}<extra></extra>"))
-                fig_pie.add_annotation(text=f"&#8377;{tc:,.0f}",x=0.5,y=0.5,font_size=11,font_color="#e8e8f0",font_family="Fira Code",showarrow=False)
+                fig_pie=go.Figure(go.Pie(labels=[r["sym"] for r in rows],values=[r["val"] for r in rows],hole=0.68,marker_colors=COLORS[:len(rows)],textinfo="label+percent",textfont=dict(family="Fira Code",size=10,color="#e8e8f0"),hovertemplate="<b>%{label}</b><br>₹%{value:,.0f}<extra></extra>"))
+                fig_pie.add_annotation(text=f"₹{tc:,.0f}",x=0.5,y=0.5,font_size=11,font_color="#e8e8f0",font_family="Fira Code",showarrow=False)
                 fig_pie.update_layout(**pt(280),showlegend=False)
                 st.plotly_chart(fig_pie,use_container_width=True)
 
@@ -728,18 +735,18 @@ def tab_charts():
         st.plotly_chart(fig_c, use_container_width=True)
         lr = dfc.iloc[-1]
         s1,s2,s3,s4,s5 = st.columns(5)
-        with s1: st.metric("Close",  f"&#8377;{lr['Close']:,.2f}")
+        with s1: st.metric("Close",  f"₹{lr['Close']:,.2f}")
         with s2: st.metric("RSI",    f"{lr['RSI']:.1f}")
-        with s3: st.metric("EMA 9",  f"&#8377;{lr['EMA9']:,.2f}")
-        with s4: st.metric("EMA 21", f"&#8377;{lr['EMA21']:,.2f}")
-        with s5: st.metric("EMA 50", f"&#8377;{lr['EMA50']:,.2f}")
+        with s3: st.metric("EMA 9",  f"₹{lr['EMA9']:,.2f}")
+        with s4: st.metric("EMA 21", f"₹{lr['EMA21']:,.2f}")
+        with s5: st.metric("EMA 50", f"₹{lr['EMA50']:,.2f}")
         st.markdown('<div class="sh">Trade Levels &nbsp;&bull;&nbsp; Current Price</div>', unsafe_allow_html=True)
         cp=float(lr["Close"]); sl=round(cp*.97,2); t1=round(cp*1.04,2); t2=round(cp*1.08,2); rr=round((t1-cp)/(cp-sl),2)
         tl1,tl2,tl3,tl4,tl5 = st.columns(5)
-        with tl1: st.metric("Entry Price", f"&#8377;{cp:,.2f}")
-        with tl2: st.metric("Stop Loss",   f"&#8377;{sl:,.2f}", delta="-3%", delta_color="inverse")
-        with tl3: st.metric("Target 1",    f"&#8377;{t1:,.2f}", delta="+4%")
-        with tl4: st.metric("Target 2",    f"&#8377;{t2:,.2f}", delta="+8%")
+        with tl1: st.metric("Entry Price", f"₹{cp:,.2f}")
+        with tl2: st.metric("Stop Loss",   f"₹{sl:,.2f}", delta="-3%", delta_color="inverse")
+        with tl3: st.metric("Target 1",    f"₹{t1:,.2f}", delta="+4%")
+        with tl4: st.metric("Target 2",    f"₹{t2:,.2f}", delta="+8%")
         with tl5: st.metric("Risk/Reward", f"1 : {rr}")
 
 
@@ -776,7 +783,7 @@ def tab_screener():
             disp = scr[dcols].copy()
             disp["symbol"] = disp["symbol"].str.replace(".NS","").str.replace(".BO","")
             disp.columns = [c.upper() for c in disp.columns]
-            fmt = {k:v for k,v in {"PRICE":"&#8377;{:,.2f}","CONFIDENCE":"{:.1f}%","RSI":"{:.1f}","ATR STOP":"&#8377;{:,.2f}","TARGET 1":"&#8377;{:,.2f}","TARGET 2":"&#8377;{:,.2f}","ML SCORE":"{:.1f}%","RISK/REWARD":"1:{:.2f}"}.items() if k in disp.columns}
+            fmt = {k:v for k,v in {"PRICE":"₹{:,.2f}","CONFIDENCE":"{:.1f}%","RSI":"{:.1f}","ATR STOP":"₹{:,.2f}","TARGET 1":"₹{:,.2f}","TARGET 2":"₹{:,.2f}","ML SCORE":"{:.1f}%","RISK/REWARD":"1:{:.2f}"}.items() if k in disp.columns}
             st.dataframe(disp.style.applymap(lambda v:"color:#00e87a;font-weight:bold" if str(v).startswith("BUY") else ("color:#ff4d6a;font-weight:bold" if str(v).startswith("SELL") else ""),subset=["SIGNAL"] if "SIGNAL" in disp.columns else []).format(fmt),use_container_width=True,height=520)
 
 

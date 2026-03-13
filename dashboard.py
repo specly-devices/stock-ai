@@ -1,4 +1,4 @@
-import streamlit as st
+﻿import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -13,7 +13,7 @@ load_dotenv()
 
 st.set_page_config(
     page_title="StockAI Terminal",
-    page_icon="📈",
+    page_icon="ðŸ“ˆ",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -62,7 +62,7 @@ html,body,[class*="css"]{font-family:'Space Grotesk',sans-serif!important;backgr
 </style>
 """, unsafe_allow_html=True)
 
-# ── Helpers ────────────────────────────────────────────────────────────────
+# â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def sig_color(s):
     s = str(s)
     if s.startswith("BUY"):  return "#00ff88"
@@ -110,7 +110,7 @@ def base_layout(h=320):
     return dict(height=h, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#0d1117",
                 margin=dict(l=0,r=0,t=10,b=0), font=dict(family="DM Mono",color="#64748b"))
 
-# ── Data ────────────────────────────────────────────────────────────────────
+# â”€â”€ Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @st.cache_data(ttl=300)
 def get_signals():
     try:
@@ -207,9 +207,9 @@ def get_calendar():
         return get_upcoming_events(days_ahead=30)
     except: return []
 
-# ══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # HEADER
-# ══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 h1, h2 = st.columns([1,3])
 with h1:
     st.markdown("""
@@ -236,14 +236,14 @@ with h2:
 
 st.markdown("<hr style='border:1px solid #1e2d45;margin:.5rem 0 1rem 0'>", unsafe_allow_html=True)
 
-# ══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TABS
-# ══════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 tabs = st.tabs(["&#127968;  Overview","&#128225;  Signals","&#128188;  Portfolio",
                 "&#128240;  News","&#128202;  Charts","&#128269;  Screener",
                 "&#128197;  Calendar","&#9881;&#65039;  Engine"])
 
-# ── TAB 1: OVERVIEW ────────────────────────────────────────────────────────
+# â”€â”€ TAB 1: OVERVIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 with tabs[0]:
     regime, rscore, rdet = get_regime()
     nd = rdet.get("nifty",{})
@@ -305,7 +305,7 @@ with tabs[0]:
     ov1,ov2 = st.columns([3,2])
 
     with ov1:
-        st.markdown('<div class="slabel">Nifty 50 — 6 Month</div>', unsafe_allow_html=True)
+        st.markdown('<div class="slabel">Nifty 50 â€” 6 Month</div>', unsafe_allow_html=True)
         nf = get_nifty()
         if not nf.empty:
             fig = go.Figure()
@@ -316,12 +316,12 @@ with tabs[0]:
             st.plotly_chart(fig, use_container_width=True)
 
     with ov2:
-        st.markdown('<div class="slabel">Sector Performance — 5 Day</div>', unsafe_allow_html=True)
+        st.markdown('<div class="slabel">Sector Performance â€” 5 Day</div>', unsafe_allow_html=True)
         sp = get_sectors()
         if sp:
             sn2,sv = list(sp.keys()),list(sp.values())
             fig2 = go.Figure(go.Bar(x=sv,y=sn2,orientation="h",marker_color=["#00ff88" if v>=0 else "#ff4466" for v in sv],text=[f"{v:+.2f}%" for v in sv],textposition="outside",textfont=dict(color="#e2e8f0",size=11,family="DM Mono")))
-            fig2.update_layout(**base_layout(320),xaxis=dict(showgrid=True,gridcolor="#1e2d45",color="#64748b",zeroline=True,zerolinecolor="#243350"),yaxis=dict(showgrid=False,color="#e2e8f0"),margin=dict(l=0,r=60,t=10,b=0))
+            fig2.update_layout(**base_layout(320),xaxis=dict(showgrid=True,gridcolor="#1e2d45",color="#64748b",zeroline=True,zerolinecolor="#243350"),yaxis=dict(showgrid=False,color="#e2e8f0"))
             st.plotly_chart(fig2, use_container_width=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
@@ -355,11 +355,11 @@ with tabs[0]:
                         {levels_html(price,is_buy)}
                     </div>""", unsafe_allow_html=True)
         else:
-            st.info("No strong signals — market is in BEAR mode. System is protecting capital.")
+            st.info("No strong signals â€” market is in BEAR mode. System is protecting capital.")
     else:
         st.info("No signal data yet. Run the engine first.")
 
-# ── TAB 2: SIGNALS ─────────────────────────────────────────────────────────
+# â”€â”€ TAB 2: SIGNALS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 with tabs[1]:
     sdf = get_signals()
     if sdf.empty:
@@ -369,14 +369,14 @@ with tabs[1]:
         fc1,fc2,fc3,fc4 = st.columns(4)
         with fc1: sf = st.selectbox("Signal",["All","BUY","SELL","HOLD"])
         with fc2: mc = st.slider("Min Confidence %",0,100,0)
-        with fc3: srt= st.selectbox("Sort By",["Confidence ↓","Confidence ↑","RSI ↓","RSI ↑","Symbol"])
+        with fc3: srt= st.selectbox("Sort By",["Confidence â†“","Confidence â†‘","RSI â†“","RSI â†‘","Symbol"])
         with fc4: srch=st.text_input("Search",placeholder="e.g. SBIN")
 
         f = lat.copy()
         if sf!="All": f = f[f["signal"].str.startswith(sf)]
         f = f[f["confidence"]>=mc]
         if srch: f = f[f["symbol"].str.contains(srch.upper(),na=False)]
-        sm2 = {"Confidence ↓":("confidence",False),"Confidence ↑":("confidence",True),"RSI ↓":("rsi",False),"RSI ↑":("rsi",True),"Symbol":("symbol",True)}
+        sm2 = {"Confidence â†“":("confidence",False),"Confidence â†‘":("confidence",True),"RSI â†“":("rsi",False),"RSI â†‘":("rsi",True),"Symbol":("symbol",True)}
         sc2,sa2 = sm2[srt]
         if sc2 in f.columns: f = f.sort_values(sc2,ascending=sa2)
 
@@ -416,7 +416,7 @@ with tabs[1]:
                         <div style="font-size:10px;color:#334155;margin-top:4px">{fmt_t(row.get('created_at',''))}</div>
                     </div>""", unsafe_allow_html=True)
 
-# ── TAB 3: PORTFOLIO ───────────────────────────────────────────────────────
+# â”€â”€ TAB 3: PORTFOLIO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 with tabs[2]:
     portfolio = get_portfolio()
     if not portfolio:
@@ -511,7 +511,7 @@ with tabs[2]:
                 fig_pie.update_layout(**base_layout(300),showlegend=False)
                 st.plotly_chart(fig_pie, use_container_width=True)
 
-# ── TAB 4: NEWS ────────────────────────────────────────────────────────────
+# â”€â”€ TAB 4: NEWS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 with tabs[3]:
     ndf=get_news()
     if ndf.empty:
@@ -565,7 +565,7 @@ with tabs[3]:
                 </div>
             </div>""", unsafe_allow_html=True)
 
-# ── TAB 5: CHARTS ──────────────────────────────────────────────────────────
+# â”€â”€ TAB 5: CHARTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 with tabs[4]:
     sdf=get_signals()
     syms=sorted(sdf["symbol"].dropna().unique().tolist()) if not sdf.empty else ["RELIANCE.NS","TCS.NS","HDFCBANK.NS"]
@@ -608,7 +608,7 @@ with tabs[4]:
         with tl4: st.metric("&#127919; Target 2", f"&#8377;{t2:,.2f}",delta="+8%")
         with tl5: st.metric("&#9878;&#65039; R:R", f"1:{rr}")
 
-# ── TAB 6: SCREENER ────────────────────────────────────────────────────────
+# â”€â”€ TAB 6: SCREENER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 with tabs[5]:
     sdf=get_signals()
     if sdf.empty:
@@ -643,11 +643,11 @@ with tabs[5]:
             disp.columns=[c.upper() for c in disp.columns]
             st.dataframe(disp,use_container_width=True,height=520)
 
-# ── TAB 7: CALENDAR ────────────────────────────────────────────────────────
+# â”€â”€ TAB 7: CALENDAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 with tabs[6]:
     events=get_calendar()
     today=datetime.now().date()
-    st.markdown('<div class="slabel">Economic Calendar — Next 30 Days</div>', unsafe_allow_html=True)
+    st.markdown('<div class="slabel">Economic Calendar â€” Next 30 Days</div>', unsafe_allow_html=True)
     IMPACT={"EXTREME":("#ff4466","#4a0010","&#128680;"),"HIGH":("#ff8844","#3d1f00","&#9888;&#65039;"),"MEDIUM":("#ffcc00","#3d3200","&#128993;"),"HOLIDAY":("#4488ff","#001844","&#127958;&#65039;")}
 
     if not events:
@@ -682,7 +682,7 @@ with tabs[6]:
         with rc2[i%3]:
             st.markdown(f'<div style="background:{bg2};border:1px solid {c2}33;border-radius:8px;padding:.8rem 1rem;margin-bottom:.5rem;opacity:{"0.4" if past else "1"}"><div class="mono" style="font-size:13px;color:{c2};font-weight:600">{dt2.strftime("%d %B %Y")}</div><div style="font-size:10px;letter-spacing:2px;color:{c2}88;text-transform:uppercase;margin-top:2px">RBI Policy &#183; {lbl}</div></div>', unsafe_allow_html=True)
 
-# ── TAB 8: ENGINE ──────────────────────────────────────────────────────────
+# â”€â”€ TAB 8: ENGINE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 with tabs[7]:
     st.markdown('<div class="slabel">Manual Engine Controls</div>', unsafe_allow_html=True)
     e1,e2,e3=st.columns(3)
@@ -711,7 +711,7 @@ with tabs[7]:
         with col2:
             st.markdown(f'<div class="card"><div class="slabel">{lbl2}</div><div class="mono" style="font-size:15px;color:#00d4ff;font-weight:500">{val2}</div></div>', unsafe_allow_html=True)
 
-# ── SIDEBAR ────────────────────────────────────────────────────────────────
+# â”€â”€ SIDEBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 with st.sidebar:
     st.markdown('<div style="font-family:\'Outfit\',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:1rem;background:linear-gradient(135deg,#00ff88,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent">&#9889; StockAI Controls</div>', unsafe_allow_html=True)
     st.markdown('<div class="slabel">Auto Refresh</div>', unsafe_allow_html=True)
@@ -748,3 +748,4 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown(f'<div style="font-size:10px;color:#334155;text-align:center;font-family:\'DM Mono\',monospace">{datetime.now().strftime("%d %b %Y %H:%M:%S")}</div>', unsafe_allow_html=True)
+
